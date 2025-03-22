@@ -13,7 +13,7 @@ export default function LandingPage() {
   const [showSetupText, setShowSetupText] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);
 
-  const fullText = "Welcome to Code & Run - Updated".trim();
+  const fullText = "Welcome to Code & Run - Updated again".trim();
 
   useEffect(() => {
     const handleScroll = () => {
