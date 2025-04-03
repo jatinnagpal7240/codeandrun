@@ -1,21 +1,30 @@
-require("dotenv").config(); // Load environment variables
-
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+require("dotenv").config();
+
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
-const PORT = 5000;
 
-// Check if MONGO_URI is defined
-if (!process.env.MONGO_URI) {
-  console.error("❌ MONGO_URI is not set in .env file!");
-  process.exit(1); // Stop the server if URI is missing
-}
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-// Connect to MongoDB
+// Routes
+app.use("/auth", require("./routes/authRoutes"));
+
+// Database Connection
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log("MongoDB connection error:", err));
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err);
+    process.exit(1); // Exit the app if DB connection fails
+  });
 
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
