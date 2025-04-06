@@ -1,84 +1,60 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+
 const router = express.Router();
 
-const otpStore = {}; // Temporary OTP storage (Replace with DB in production)
+// Email, Phone & Password Validation Regex
+const emailRegex =
+  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|in|co|io|tech)$/;
+const phoneRegex = /^[0-9]{10}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
 
-// Function to generate 6-digit OTP
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+router.post("/signup", async (req, res) => {
+  const { phone, email, password } = req.body;
 
-// Check if user exists
-router.post("/check-user", async (req, res) => {
-  try {
-    const { email, phone } = req.body;
-    const user = await User.findOne({ $or: [{ email }, { phone }] });
-
-    if (user) {
-      return res.json({ exists: true, message: "User already exists." });
-    }
-    return res.json({ exists: false });
-  } catch (error) {
-    console.error("Error checking user:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+  // Check if email & phone are in correct format
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Invalid email format." });
   }
-});
 
-// Send OTP for Signup
-router.post("/send-otp", async (req, res) => {
-  try {
-    const { email, phone } = req.body;
-
-    if (!email || !phone) {
-      return res.status(400).json({ message: "Email and Phone are required." });
-    }
-
-    // Generate and store OTPs
-    const otpPhone = generateOTP();
-    const otpEmail = generateOTP();
-
-    otpStore[email] = otpEmail;
-    otpStore[phone] = otpPhone;
-
-    console.log(`OTP for ${email}: ${otpEmail}`);
-    console.log(`OTP for ${phone}: ${otpPhone}`);
-
-    res.json({ message: "OTP sent successfully!" });
-  } catch (error) {
-    console.error("OTP Sending Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({ message: "Phone number must be 10 digits." });
   }
-});
 
-// Verify OTP & Register User
-router.post("/verify-otp", async (req, res) => {
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      message:
+        "Password must be 8-16 characters with 1 uppercase, 1 digit, and 1 special character (@ * .)",
+    });
+  }
+
   try {
-    const { email, phone, password, otpEmail, otpPhone } = req.body;
+    // Check if email or phone already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { phone }] });
 
-    if (!otpStore[email] || !otpStore[phone]) {
-      return res.status(400).json({ message: "OTP expired or not sent." });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: "Email or phone number already exists." });
     }
 
-    if (otpStore[email] !== otpEmail || otpStore[phone] !== otpPhone) {
-      return res.status(400).json({ message: "Invalid OTP." });
-    }
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Save user to database
+    const newUser = new User({
+      phone,
+      email,
+      password: hashedPassword,
+    });
 
-    // Create new user
-    const newUser = new User({ phone, email, password: hashedPassword });
     await newUser.save();
-
-    // Remove OTP from temporary store
-    delete otpStore[email];
-    delete otpStore[phone];
-
-    return res.status(201).json({ message: "Signup successful!" });
+    res.status(201).json({ message: "User registered successfully!" });
   } catch (error) {
     console.error("Signup Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ message: "Server error. Please try again." });
   }
 });
 

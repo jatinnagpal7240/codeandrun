@@ -7,7 +7,11 @@ import Link from "next/link";
 
 export default function SignupPage() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!mounted) return null; // Prevent SSR mismatch
 
   return (
@@ -28,14 +32,14 @@ export default function SignupPage() {
       {/* Spacer for Fixed Header */}
       <div className="pt-[80px]"></div>
 
-      {/* Signup Form */}
-      <div className="mt-10 p-6 w-full max-w-md bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-semibold text-center">
-          Create an Account
-        </h2>
+      {/* Signup Form Container */}
+      <div className="mt-10 p-6 w-full max-w-md bg-white rounded-lg shadow-md text-center">
+        <h2 className="text-2xl font-semibold">Create an Account</h2>
       </div>
 
-      <div className="mt-6 p-6 w-full max-w-md bg-white rounded-lg shadow-md">
+      <div className="mt-6"></div>
+
+      <div className="p-6 w-full max-w-md bg-white rounded-lg shadow-md">
         <SignupForm />
       </div>
     </div>
@@ -50,15 +54,14 @@ const SignupForm = () => {
     email: "",
     password: "",
   });
+
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpPhone, setOtpPhone] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [id]: value.trimStart() }));
+
     setErrors((prevErrors) => {
       let newErrors = { ...prevErrors };
       delete newErrors[id]; // Clear error when user types
@@ -66,121 +69,62 @@ const SignupForm = () => {
     });
   };
 
-  const handleSendOtp = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrors({});
-
     let newErrors = {};
+
+    // Email Validation (Gmail-like)
     const emailRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|in|co|io|tech)$/;
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required.";
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = "Enter a valid email address.";
+    }
+
+    // Phone Number Validation (10 digits)
     const phoneRegex = /^[0-9]{10}$/;
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required.";
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Enter a valid 10-digit phone number.";
+    }
+
+    // Password Validation
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
-
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    else if (!emailRegex.test(formData.email))
-      newErrors.email = "Enter a valid email.";
-
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required.";
-    else if (!phoneRegex.test(formData.phone))
-      newErrors.phone = "Enter a valid 10-digit number.";
-
-    if (!formData.password.trim()) newErrors.password = "Password is required.";
-    else if (!passwordRegex.test(formData.password))
+    if (!formData.password.trim()) {
+      newErrors.password = "Password is required.";
+    } else if (!passwordRegex.test(formData.password)) {
       newErrors.password =
-        "Password must be 8-16 chars with 1 uppercase, 1 digit, 1 special (@ * .)";
+        "Password must be 8-16 characters with 1 uppercase, 1 digit, and 1 special character (@ * .)";
+    }
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length !== 0) return;
-
-    try {
-      // Check if the user already exists
-      const checkResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/check-user`,
-        {
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        const response = await fetch("http://localhost:5000/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            phone: formData.phone,
-          }),
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert("Signup successful!");
+          router.push("/dashboard");
+        } else {
+          alert(data.message);
         }
-      );
-
-      const checkData = await checkResponse.json();
-      if (checkData.exists) {
-        alert("User already exists. Try logging in.");
-        return;
+      } catch (error) {
+        console.error("Signup Error:", error);
+        alert("Something went wrong. Please try again.");
       }
-
-      // Send OTP
-      const otpResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/send-otp`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            phone: formData.phone,
-          }),
-        }
-      );
-
-      const otpData = await otpResponse.json();
-      if (!otpResponse.ok) {
-        alert(otpData.message || "Failed to send OTP.");
-        return;
-      }
-
-      alert("OTP sent successfully!");
-      setOtpSent(true);
-      setOtpPhone("");
-      setOtpEmail("");
-    } catch (error) {
-      console.error("OTP Send Error:", error);
-      alert("Failed to send OTP. Try again.");
-    }
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-
-    if (!otpPhone || !otpEmail) {
-      alert("Please enter OTPs.");
-      return;
-    }
-
-    try {
-      const verifyResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            phone: formData.phone,
-            password: formData.password,
-            otpEmail,
-            otpPhone,
-          }),
-        }
-      );
-
-      const verifyData = await verifyResponse.json();
-      if (!verifyResponse.ok) {
-        alert(verifyData.message || "OTP verification failed.");
-        return;
-      }
-
-      alert("Signup successful!");
-      router.push("/dashboard");
-    } catch (error) {
-      console.error("OTP Verification Error:", error);
-      alert("Something went wrong. Please try again.");
     }
   };
 
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <InputField
         id="phone"
         label="Phone Number"
@@ -222,54 +166,23 @@ const SignupForm = () => {
         </label>
       </div>
 
-      {!otpSent ? (
-        <button
-          onClick={handleSendOtp}
-          className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-emerald-700 transition duration-300 transform hover:scale-[1.03] active:scale-[0.97]"
-        >
-          Send OTP
-        </button>
-      ) : (
-        <>
-          <InputField
-            id="otpPhone"
-            label="Enter Phone OTP"
-            value={otpPhone}
-            onChange={(e) => setOtpPhone(e.target.value)}
-            error={errors.otpPhone}
-          />
-          <InputField
-            id="otpEmail"
-            label="Enter Email OTP"
-            value={otpEmail}
-            onChange={(e) => setOtpEmail(e.target.value)}
-            error={errors.otpEmail}
-          />
-          <button className="btn-success" onClick={handleVerifyOtp}>
-            Verify OTP & Signup
-          </button>
-        </>
-      )}
+      <button
+        type="submit"
+        className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-emerald-700 transition duration-300 transform hover:scale-[1.03] active:scale-[0.97]"
+      >
+        Sign Up
+      </button>
     </form>
   );
 };
 
-const InputField = ({
-  id,
-  label,
-  type = "text",
-  value,
-  onChange,
-  onBlur,
-  error,
-}) => (
+const InputField = ({ id, label, type = "text", value, onChange, error }) => (
   <div className="relative w-full">
     <input
       type={type}
       id={id}
       value={value}
       onChange={onChange}
-      onBlur={onBlur}
       className={`peer w-full px-4 pt-5 pb-2 border ${
         error ? "border-red-500" : "border-gray-400"
       } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
