@@ -74,12 +74,12 @@ const SignupForm = () => {
     let newErrors = {};
 
     // Email Validation (Gmail-like)
-    const emailRegex =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|in|co|io|tech)$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Enter a valid email address.";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.identifier.trim()) {
+      newErrors.identifier = "Email or phone is required.";
+    } else if (!emailRegex.test(formData.identifier)) {
+      newErrors.identifier = "Enter a valid email address.";
     }
 
     // Phone Number Validation (10 digits)
@@ -102,11 +102,14 @@ const SignupForm = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await fetch("http://localhost:5000/api/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          }
+        );
 
         const data = await response.json();
 

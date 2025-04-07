@@ -80,11 +80,14 @@ const LoginForm = () => {
 
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+          }
+        );
 
         const contentType = response.headers.get("Content-Type");
 
