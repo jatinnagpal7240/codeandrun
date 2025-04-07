@@ -70,29 +70,31 @@ const SignupForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log("Form Submitted", formData);
     e.preventDefault();
     let newErrors = {};
 
-    // Email Validation (Gmail-like)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
 
-    if (!formData.identifier.trim()) {
+    // ✅ Identifier logic: at least one should be provided
+    if (!formData.email?.trim() && !formData.phone?.trim()) {
       newErrors.identifier = "Email or phone is required.";
-    } else if (!emailRegex.test(formData.identifier)) {
-      newErrors.identifier = "Enter a valid email address.";
     }
 
-    // Phone Number Validation (10 digits)
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required.";
-    } else if (!phoneRegex.test(formData.phone)) {
+    // ✅ Email validation only if email is entered
+    if (formData.email?.trim() && !emailRegex.test(formData.email)) {
+      newErrors.email = "Enter a valid email address.";
+    }
+
+    // ✅ Phone validation only if phone is entered
+    if (formData.phone?.trim() && !phoneRegex.test(formData.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number.";
     }
 
-    // Password Validation
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
-    if (!formData.password.trim()) {
+    // ✅ Password validation
+    if (!formData.password?.trim()) {
       newErrors.password = "Password is required.";
     } else if (!passwordRegex.test(formData.password)) {
       newErrors.password =
@@ -100,8 +102,15 @@ const SignupForm = () => {
     }
 
     setErrors(newErrors);
+    console.log("Validation Errors:", newErrors);
+
     if (Object.keys(newErrors).length === 0) {
       try {
+        console.log(
+          "Sending request to:",
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`
+        );
+
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`,
           {
@@ -112,6 +121,7 @@ const SignupForm = () => {
         );
 
         const data = await response.json();
+        console.log("Received response:", data);
 
         if (response.ok) {
           alert("Signup successful!");
