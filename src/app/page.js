@@ -36,7 +36,7 @@ export default async function LandingPage() {
               Create Account
             </button>
           </Link>
-          <Link href="/signin">
+          <Link href="/login">
             <button className="w-48 px-6 py-2 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transition">
               Sign In
             </button>

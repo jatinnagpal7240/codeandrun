@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -32,92 +32,79 @@ export default function SignupPage() {
       {/* Spacer for Fixed Header */}
       <div className="pt-[80px]"></div>
 
-      {/* Signup Form Container */}
+      {/* Login Form Container */}
       <div className="mt-10 p-4 w-full max-w-md bg-white rounded-lg shadow-md text-center">
-        <h2 className="text-2xl font-semibold">Create an Account</h2>
+        <h2 className="text-2xl font-semibold">Sign In</h2>
       </div>
 
       <div className="mt-6"></div>
 
       <div className="p-6 w-full max-w-md bg-white rounded-lg shadow-md">
-        <SignupForm />
+        <LoginForm />
       </div>
     </div>
   );
 }
 
-// Signup Form Component
-const SignupForm = () => {
+// Login Form Component
+const LoginForm = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    phone: "",
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [id]: value.trimStart() }));
-
-    setErrors((prevErrors) => {
-      let newErrors = { ...prevErrors };
-      delete newErrors[id]; // Clear error when user types
+    setFormData((prev) => ({ ...prev, [id]: value.trimStart() }));
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[id];
       return newErrors;
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let newErrors = {};
+    const newErrors = {};
 
-    // Email Validation (Gmail-like)
-    const emailRegex =
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|mil|in|co|io|tech)$/;
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Enter a valid email address.";
+    // Validation
+    if (!formData.identifier.trim()) {
+      newErrors.identifier = "Email or phone is required.";
     }
 
-    // Phone Number Validation (10 digits)
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required.";
-    } else if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Enter a valid 10-digit phone number.";
-    }
-
-    // Password Validation
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
     if (!formData.password.trim()) {
       newErrors.password = "Password is required.";
-    } else if (!passwordRegex.test(formData.password)) {
-      newErrors.password =
-        "Password must be 8-16 characters with 1 uppercase, 1 digit, and 1 special character (@ * .)";
     }
 
     setErrors(newErrors);
+
     if (Object.keys(newErrors).length === 0) {
       try {
-        const response = await fetch("http://localhost:5000/api/signup", {
+        const response = await fetch("http://127.0.0.1:5000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
 
+        const contentType = response.headers.get("Content-Type");
+
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Invalid response (not JSON):", text);
+          alert("Unexpected server response. Please try again.");
+          return;
+        }
+
         const data = await response.json();
 
         if (response.ok) {
-          alert("Signup successful!");
+          alert("Login successful!");
           router.push("/dashboard");
         } else {
-          alert(data.message);
+          alert(data.message || "Login failed.");
         }
-      } catch (error) {
-        console.error("Signup Error:", error);
+      } catch (err) {
+        console.error("Login Error:", err);
         alert("Something went wrong. Please try again.");
       }
     }
@@ -126,24 +113,15 @@ const SignupForm = () => {
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <InputField
-        id="phone"
-        label="Phone Number"
-        type="tel"
-        value={formData.phone}
+        id="identifier"
+        label="Email or Phone"
+        value={formData.identifier}
         onChange={handleChange}
-        error={errors.phone}
-      />
-      <InputField
-        id="email"
-        label="Email Address"
-        type="email"
-        value={formData.email}
-        onChange={handleChange}
-        error={errors.email}
+        error={errors.identifier}
       />
       <InputField
         id="password"
-        label="Create Password"
+        label="Password"
         type={showPassword ? "text" : "password"}
         value={formData.password}
         onChange={handleChange}
@@ -168,15 +146,16 @@ const SignupForm = () => {
 
       <button
         type="submit"
-        className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-emerald-700 transition duration-300 transform hover:scale-[1.03] active:scale-[0.97]"
+        className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-blue-600 hover:to-indigo-700 transition duration-300 transform hover:scale-[1.03] active:scale-[0.97]"
       >
-        Sign Up
+        Log In
       </button>
 
+      {/* 👇 Add this text with very minimal spacing */}
       <div className="mt-[-14px] text-center text-sm text-gray-600">
-        Already have an account?{" "}
-        <Link href="/login" className="text-blue-600 hover:underline">
-          Login
+        Don’t have an account?{" "}
+        <Link href="/signup" className="text-blue-600 hover:underline">
+          Create one
         </Link>
       </div>
     </form>
