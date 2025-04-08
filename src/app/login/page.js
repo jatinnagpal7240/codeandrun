@@ -10,6 +10,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn === "true") {
+      router.push("/dashboard");
+    }
   }, []);
 
   if (!mounted) return null; // Prevent SSR mismatch
