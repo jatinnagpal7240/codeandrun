@@ -83,12 +83,14 @@ const LoginForm = () => {
       setLoading(true); // ✅ Start loading
 
       try {
+        console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),
+            credentials: "include", // 👈 Essential for sending/receiving cookies
           }
         );
 

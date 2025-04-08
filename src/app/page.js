@@ -1,15 +1,41 @@
-import { redirect } from "next/navigation";
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getSession } from "../utils/auth"; // Import session check function
 
-export default async function LandingPage() {
-  const session = await getSession();
+export default function LandingPage() {
+  const router = useRouter();
+  const [checkingSession, setCheckingSession] = useState(true);
 
-  // Redirect logged-in users to the dashboard
-  if (session) {
-    redirect("/dashboard");
-  }
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch(
+          "https://cr-backend-r0vn.onrender.com/api/session/verify",
+          {
+            method: "GET",
+            credentials: "include", // important for sending cookies
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log("User is logged in:", data.user);
+          router.push("/dashboard"); // Redirect if session is valid
+        } else {
+          setCheckingSession(false); // Continue showing the landing page
+        }
+      } catch (err) {
+        console.error("Error checking session:", err);
+        setCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
+  if (checkingSession) return null; // or a loading spinner
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
@@ -29,7 +55,7 @@ export default async function LandingPage() {
         <h1 className="text-5xl font-semibold">Welcome to Code & Run</h1>
         <p className="text-2xl mt-2">Learn. Build. Grow.</p>
 
-        {/* Centered Buttons (Side-by-Side) */}
+        {/* Buttons */}
         <div className="mt-6 flex justify-center space-x-4">
           <Link href="/signup">
             <button className="w-48 px-6 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition">
