@@ -16,14 +16,14 @@ const Dashboard = () => {
       setLoading(false);
     };
 
-    setTimeout(checkLogin, 400);
+    setTimeout(checkLogin, 100);
   }, [router]);
 
-  if (loading) {
-    return (
-      <p style={{ textAlign: "center", paddingTop: "2rem" }}>Loading...</p>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <p style={{ textAlign: "center", paddingTop: "2rem" }}>Loading...</p>
+  //   );
+  // }
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>

@@ -57,6 +57,7 @@ const SignupForm = () => {
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -78,7 +79,6 @@ const SignupForm = () => {
     const phoneRegex = /^[0-9]{10}$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@*.])[A-Za-z\d@*.]{8,16}$/;
 
-    // ✅ Identifier logic: at least one should be provided
     if (!formData.email?.trim() && !formData.phone?.trim()) {
       newErrors.identifier = "Email or phone is required.";
     }
@@ -102,6 +102,8 @@ const SignupForm = () => {
     console.log("Validation Errors:", newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true); // ✅ Start loading
+
       try {
         console.log(
           "Sending request to:",
@@ -118,10 +120,9 @@ const SignupForm = () => {
         );
 
         const data = await response.json();
-        console.log("Signup response data:", data); // ✅ Defensive logging
+        console.log("Signup response data:", data);
 
         if (response.ok) {
-          alert("Signup successful!");
           localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
@@ -130,9 +131,27 @@ const SignupForm = () => {
       } catch (error) {
         console.error("Signup Error:", error);
         alert("Something went wrong. Please try again.");
+      } finally {
+        setLoading(false); // ✅ Stop loading
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[200px]">
+        <div className="relative w-12 h-12">
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-green-500 rounded-full animate-ping-slow"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-green-500 rounded-full opacity-70 animate-ping-slow delay-150"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-green-500 rounded-full opacity-40 animate-ping-slow delay-300"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-green-500 rounded-full animate-spin"></div>
+        </div>
+        <p className="mt-4 text-green-600 text-sm tracking-wide animate-fade-in-slow">
+          Creating your account securely...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>

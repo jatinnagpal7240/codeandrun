@@ -52,6 +52,7 @@ const LoginForm = () => {
   const [formData, setFormData] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -69,16 +70,18 @@ const LoginForm = () => {
 
     // Validation
     if (!formData.identifier.trim()) {
-      newErrors.identifier = "Email or phone is required.";
+      newErrors.identifier = "Enter an email or phone number.";
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = "Password is required.";
+      newErrors.password = "Enter your password.";
     }
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
+      setLoading(true); // ✅ Start loading
+
       try {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/login`,
@@ -101,7 +104,6 @@ const LoginForm = () => {
         const data = await response.json();
 
         if (response.ok) {
-          alert("Login successful!");
           localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
@@ -110,9 +112,27 @@ const LoginForm = () => {
       } catch (err) {
         console.error("Login Error:", err);
         alert("Something went wrong. Please try again.");
+      } finally {
+        setLoading(false); // ✅ Stop loading
       }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[200px]">
+        <div className="relative w-12 h-12">
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full animate-ping-slow"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full opacity-70 animate-ping-slow delay-150"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full opacity-40 animate-ping-slow delay-300"></div>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <p className="mt-4 text-blue-600 text-sm tracking-wide animate-fade-in-slow">
+          Logging you in securely...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
