@@ -15,16 +15,16 @@ export default function LandingPage() {
           "https://cr-backend-r0vn.onrender.com/api/session/verify",
           {
             method: "GET",
-            credentials: "include", // important for sending cookies
+            credentials: "include",
           }
         );
 
         if (res.ok) {
           const data = await res.json();
           console.log("User is logged in:", data.user);
-          router.push("/dashboard"); // Redirect if session is valid
+          router.push("/dashboard");
         } else {
-          setCheckingSession(false); // Continue showing the landing page
+          setCheckingSession(false);
         }
       } catch (err) {
         console.error("Error checking session:", err);
@@ -35,11 +35,21 @@ export default function LandingPage() {
     checkSession();
   }, [router]);
 
-  if (checkingSession) return null; // or a loading spinner
+  // 👉 Show loader during session check
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-dashed rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-emerald-600">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
 
+  // 👉 Regular Landing Page content
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
-      {/* Logo */}
       <div className="absolute top-10">
         <Image
           src="/logo.png"
@@ -50,12 +60,10 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Welcome Message */}
       <div className="text-center">
         <h1 className="text-5xl font-semibold">Welcome to Code & Run</h1>
         <p className="text-2xl mt-2">Learn. Build. Grow.</p>
 
-        {/* Buttons */}
         <div className="mt-6 flex justify-center space-x-4">
           <Link href="/signup">
             <button className="w-48 px-6 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition">
