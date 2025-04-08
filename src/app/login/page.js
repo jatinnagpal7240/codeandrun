@@ -7,6 +7,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter(); // ✅ Add this
 
   useEffect(() => {
     setMounted(true);
@@ -14,13 +15,12 @@ export default function LoginPage() {
     if (isLoggedIn === "true") {
       router.push("/dashboard");
     }
-  }, []);
+  }, [router]);
 
-  if (!mounted) return null; // Prevent SSR mismatch
+  if (!mounted) return null;
 
   return (
     <div className="w-full flex flex-col items-center bg-gray-50 text-gray-800 min-h-screen">
-      {/* Header with Logo */}
       <header className="fixed top-0 left-0 w-full flex items-center p-4 bg-white z-50 shadow-md">
         <Link href="/">
           <Image
@@ -33,10 +33,8 @@ export default function LoginPage() {
         </Link>
       </header>
 
-      {/* Spacer for Fixed Header */}
       <div className="pt-[80px]"></div>
 
-      {/* Login Form Container */}
       <div className="mt-10 p-4 w-full max-w-md bg-white rounded-lg shadow-md text-center">
         <h2 className="text-2xl font-semibold">Sign In</h2>
       </div>
