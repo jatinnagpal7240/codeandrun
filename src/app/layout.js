@@ -15,7 +15,7 @@ export const metadata = {
   title: "Code & Run - Education and then Everything",
   description: "Education and then Everything",
   icons: {
-    icon: "favicon.png", // Make sure this file is in your `public` folder.
+    icon: "favicon-1.png", // Make sure this file is in your `public` folder.
   },
 };
 

@@ -101,10 +101,8 @@ const LoginForm = () => {
         const data = await response.json();
 
         if (response.ok) {
-          // ✅ Save userId to localStorage
-          localStorage.setItem("userId", data.userId);
-
           alert("Login successful!");
+          localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
           alert(data.message || "Login failed.");

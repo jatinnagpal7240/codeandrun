@@ -83,17 +83,14 @@ const SignupForm = () => {
       newErrors.identifier = "Email or phone is required.";
     }
 
-    // ✅ Email validation only if email is entered
     if (formData.email?.trim() && !emailRegex.test(formData.email)) {
       newErrors.email = "Enter a valid email address.";
     }
 
-    // ✅ Phone validation only if phone is entered
     if (formData.phone?.trim() && !phoneRegex.test(formData.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number.";
     }
 
-    // ✅ Password validation
     if (!formData.password?.trim()) {
       newErrors.password = "Password is required.";
     } else if (!passwordRegex.test(formData.password)) {
@@ -121,16 +118,14 @@ const SignupForm = () => {
         );
 
         const data = await response.json();
-        console.log("Received response:", data);
+        console.log("Signup response data:", data); // ✅ Defensive logging
 
         if (response.ok) {
-          // ✅ Save userId to localStorage
-          localStorage.setItem("userId", data.userId);
-
           alert("Signup successful!");
+          localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
-          alert(data.message);
+          alert(data.message || "Signup failed.");
         }
       } catch (error) {
         console.error("Signup Error:", error);
