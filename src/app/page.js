@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -12,22 +13,23 @@ export default function LandingPage() {
     const checkSession = async () => {
       try {
         const res = await fetch(
-          "https://cr-backend-r0vn.onrender.com/api/session/verify",
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/session/verify`,
           {
             method: "GET",
-            credentials: "include",
+            credentials: "include", // Important: sends cookies
           }
         );
 
         if (res.ok) {
           const data = await res.json();
-          console.log("User is logged in:", data.user);
+          console.log("✅ Session found for:", data.user);
           router.push("/dashboard");
         } else {
+          console.log("⚠️ No session found.");
           setCheckingSession(false);
         }
       } catch (err) {
-        console.error("Error checking session:", err);
+        console.error("❌ Error checking session:", err);
         setCheckingSession(false);
       }
     };
@@ -35,21 +37,20 @@ export default function LandingPage() {
     checkSession();
   }, [router]);
 
-  // 👉 Show loader during session check
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white text-gray-800">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-dashed rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-emerald-600">Checking session...</p>
+          <div className="loader border-4 border-emerald-500 border-t-transparent w-12 h-12 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-emerald-600 text-sm">Checking session...</p>
         </div>
       </div>
     );
   }
 
-  // 👉 Regular Landing Page content
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
+      {/* Logo */}
       <div className="absolute top-10">
         <Image
           src="/logo.png"
@@ -60,10 +61,12 @@ export default function LandingPage() {
         />
       </div>
 
+      {/* Welcome Message */}
       <div className="text-center">
         <h1 className="text-5xl font-semibold">Welcome to Code & Run</h1>
         <p className="text-2xl mt-2">Learn. Build. Grow.</p>
 
+        {/* Buttons */}
         <div className="mt-6 flex justify-center space-x-4">
           <Link href="/signup">
             <button className="w-48 px-6 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition">
