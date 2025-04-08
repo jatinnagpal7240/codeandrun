@@ -124,6 +124,9 @@ const SignupForm = () => {
         console.log("Received response:", data);
 
         if (response.ok) {
+          // ✅ Save userId to localStorage
+          localStorage.setItem("userId", data.userId);
+
           alert("Signup successful!");
           router.push("/dashboard");
         } else {
