@@ -13,23 +13,23 @@ export default function LandingPage() {
     const checkSession = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/session/verify`,
+          "https://cr-backend-r0vn.onrender.com/api/session/verify",
           {
             method: "GET",
-            credentials: "include", // Important: sends cookies
+            credentials: "include", // Required to send cookies
           }
         );
 
         if (res.ok) {
           const data = await res.json();
-          console.log("✅ Session found for:", data.user);
-          router.push("/dashboard");
+          console.log("✅ Logged in as:", data.user?.email || "Unknown");
+          router.push("/dashboard"); // Redirect if valid session
         } else {
-          console.log("⚠️ No session found.");
-          setCheckingSession(false);
+          console.log("❌ No active session");
+          setCheckingSession(false); // Show landing if not logged in
         }
       } catch (err) {
-        console.error("❌ Error checking session:", err);
+        console.error("Error verifying session:", err);
         setCheckingSession(false);
       }
     };
@@ -37,17 +37,17 @@ export default function LandingPage() {
     checkSession();
   }, [router]);
 
+  // ⏳ While checking session
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white text-gray-800">
-        <div className="text-center">
-          <div className="loader border-4 border-emerald-500 border-t-transparent w-12 h-12 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-emerald-600 text-sm">Checking session...</p>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
+        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-white text-sm">Checking session...</p>
       </div>
     );
   }
 
+  // 🏡 Show landing page
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
       {/* Logo */}
