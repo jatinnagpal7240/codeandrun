@@ -11,10 +11,25 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn === "true") {
-      router.push("/dashboard");
-    }
+    const checkSession = async () => {
+      try {
+        const res = await fetch(
+          "https://cr-backend-r0vn.onrender.com/api/session/verify",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
+
+        if (res.ok) {
+          router.push("/dashboard");
+        }
+      } catch (err) {
+        console.error("Session check failed on login page", err);
+      }
+    };
+
+    checkSession();
   }, [router]);
 
   if (!mounted) return null;
@@ -108,7 +123,6 @@ const LoginForm = () => {
         const data = await response.json();
 
         if (response.ok) {
-          localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
           alert(data.message || "Login failed.");

@@ -16,7 +16,7 @@ export default function LandingPage() {
           "https://cr-backend-r0vn.onrender.com/api/session/verify",
           {
             method: "GET",
-            credentials: "include", // ✅ this is essential
+            credentials: "include",
           }
         );
 
@@ -25,7 +25,7 @@ export default function LandingPage() {
           console.log("Session valid, user:", data.user);
           router.push("/dashboard");
         } else {
-          console.log("No valid session");
+          console.log("⛔ No valid session — staying on homepage");
           setCheckingSession(false);
         }
       } catch (err) {
