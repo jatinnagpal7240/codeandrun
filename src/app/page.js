@@ -1,80 +1,43 @@
-"use client";
+// app/page.js
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import Link from "next/link";
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-export default function LandingPage() {
-  const router = useRouter();
-  const [checkingSession, setCheckingSession] = useState(true);
+export default function Home() {
+  const token = cookies().get("authToken")?.value;
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await fetch(
-          "https://cr-backend-r0vn.onrender.com/api/session/verify",
-          {
-            method: "GET",
-            credentials: "include", // ✅ this is essential
-          }
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          console.log("Session valid, user:", data.user);
-          router.push("/dashboard");
-        } else {
-          console.log("No valid session");
-          setCheckingSession(false);
-        }
-      } catch (err) {
-        console.error("Error checking session:", err);
-        setCheckingSession(false);
-      }
-    };
-
-    checkSession();
-  }, [router]);
-
-  if (checkingSession) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
-        <p>Checking your session...</p>
-      </div>
-    );
+  if (token) {
+    try {
+      jwt.verify(token, JWT_SECRET); // will throw if invalid
+      redirect("/dashboard"); // ✅ Redirect if valid session
+    } catch {
+      // Invalid token → stay on landing page
+    }
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
-      {/* Logo */}
       <div className="absolute top-10">
-        <Image
-          src="/logo.png"
-          alt="Code and Run Logo"
-          width={200}
-          height={70}
-          priority
-        />
+        <img src="/logo.png" alt="Code and Run Logo" width={200} height={70} />
       </div>
 
-      {/* Welcome Message */}
       <div className="text-center">
         <h1 className="text-5xl font-semibold">Welcome to Code & Run</h1>
         <p className="text-2xl mt-2">Learn. Build. Grow.</p>
 
-        {/* Buttons */}
         <div className="mt-6 flex justify-center space-x-4">
-          <Link href="/signup">
+          <a href="/signup">
             <button className="w-48 px-6 py-2 bg-white text-blue-600 font-semibold rounded-lg shadow-md hover:bg-gray-100 transition">
               Create Account
             </button>
-          </Link>
-          <Link href="/login">
+          </a>
+          <a href="/login">
             <button className="w-48 px-6 py-2 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transition">
               Sign In
             </button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>
