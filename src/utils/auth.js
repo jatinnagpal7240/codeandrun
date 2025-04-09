@@ -9,10 +9,9 @@ export async function getSession() {
     const token = cookies().get("authToken")?.value;
     if (!token) return null;
 
-    // Verify JWT
-    const decoded = jwt.verify(token, SECRET_KEY);
-    return decoded;
+    const decoded = jwt.verify(token, SECRET_KEY); // Verifies and decodes JWT
+    return decoded; // Return user data (typically includes user ID, etc.)
   } catch (error) {
-    return null; // Invalid or expired token
+    return null;
   }
 }
