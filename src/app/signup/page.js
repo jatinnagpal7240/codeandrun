@@ -123,7 +123,6 @@ const SignupForm = () => {
         console.log("Signup response data:", data);
 
         if (response.ok) {
-          localStorage.setItem("isLoggedIn", "true");
           router.push("/dashboard");
         } else {
           alert(data.message || "Signup failed.");

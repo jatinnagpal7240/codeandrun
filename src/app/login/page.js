@@ -11,6 +11,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
+
     const checkSession = async () => {
       try {
         const res = await fetch(
@@ -22,10 +23,13 @@ export default function LoginPage() {
         );
 
         if (res.ok) {
+          console.log("✅ Already logged in — redirecting to dashboard");
           router.push("/dashboard");
+        } else {
+          console.log("🟡 No active session — stay on login page");
         }
       } catch (err) {
-        console.error("Session check failed on login page", err);
+        console.error("❌ Session check failed on login page", err);
       }
     };
 
