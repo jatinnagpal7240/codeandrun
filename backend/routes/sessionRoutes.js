@@ -5,12 +5,12 @@ const User = require("../models/User");
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+// ✅ Session Verify
 router.get("/verify", async (req, res) => {
   try {
-    console.log("Cookies received:", req.cookies);
     const token = req.cookies.token;
 
-    // 🔍 Added debug logs
+    // 🔍 Debug logs
     console.log("Cookies received:", req.cookies);
     console.log("Token received:", token);
 
@@ -25,6 +25,16 @@ router.get("/verify", async (req, res) => {
   } catch (err) {
     res.status(401).json({ message: "Invalid or expired token" });
   }
+});
+
+// ✅ Logout route
+router.get("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 module.exports = router;
