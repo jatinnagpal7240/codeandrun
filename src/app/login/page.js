@@ -6,12 +6,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [mounted, setMounted] = useState(false);
-  const router = useRouter(); // ✅ Add this
+  const [checkingSession, setCheckingSession] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
-
     const checkSession = async () => {
       try {
         const res = await fetch(
@@ -24,19 +22,32 @@ export default function LoginPage() {
 
         if (res.ok) {
           console.log("✅ Already logged in — redirecting to dashboard");
-          router.push("/dashboard");
+          router.replace("/dashboard");
         } else {
           console.log("🟡 No active session — stay on login page");
+          setCheckingSession(false);
         }
       } catch (err) {
         console.error("❌ Session check failed on login page", err);
+        setCheckingSession(false);
       }
     };
 
     checkSession();
   }, [router]);
 
-  if (!mounted) return null;
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-600">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-blue-500 rounded-full animate-spin mb-3"></div>
+          <p className="text-sm tracking-wide animate-fade-in-slow">
+            Checking your session...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col items-center bg-gray-50 text-gray-800 min-h-screen">

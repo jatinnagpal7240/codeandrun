@@ -23,7 +23,7 @@ export default function LandingPage() {
         if (res.ok) {
           const data = await res.json();
           console.log("Session valid, user:", data.user);
-          router.push("/dashboard");
+          router.replace("/dashboard");
         } else {
           console.log("⛔ No valid session — staying on homepage");
           setCheckingSession(false);

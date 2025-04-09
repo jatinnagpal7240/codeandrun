@@ -118,7 +118,7 @@ const SignupForm = () => {
         if (response.ok) {
           setAccountCreated(true);
           setTimeout(() => {
-            router.push("/login");
+            router.replace("/login");
           }, 4000);
         } else {
           alert(data.message || "Signup failed.");
@@ -150,14 +150,45 @@ const SignupForm = () => {
 
   if (accountCreated) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
-        <div className="w-12 h-12 border-4 border-green-500 rounded-full animate-spin mb-4" />
-        <p className="text-green-600 text-lg font-semibold">
-          Account created successfully!
+      <div className="flex flex-col items-center justify-center min-h-[240px] text-center">
+        {/* Animated Checkmark Circle */}
+        <div className="relative w-16 h-16 mb-4">
+          <div className="absolute inset-0 rounded-full border-4 border-green-500 animate-ping-slow"></div>
+          <div className="absolute inset-0 flex items-center justify-center bg-green-500 rounded-full text-white text-2xl shadow-lg">
+            ✓
+          </div>
+        </div>
+
+        {/* Headline */}
+        <h2 className="text-2xl font-bold text-green-600 mb-1 animate-fade-in-slow">
+          Welcome aboard!
+        </h2>
+
+        {/* Description */}
+        <p className="text-gray-600 text-sm max-w-xs animate-fade-in-slow delay-100">
+          Your account has been created. You’re being redirected to login —
+          where the real journey begins.
         </p>
-        <p className="text-gray-600 text-sm mt-1">
-          Redirecting to login page...
-        </p>
+
+        {/* Progress indicator */}
+        <div className="w-full max-w-[200px] mt-6 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 animate-[loading-bar_3s_linear_infinite]" />
+        </div>
+
+        <style jsx>{`
+          @keyframes loading-bar {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
+          }
+
+          .animate-[loading-bar_3s_linear_infinite] {
+            animation: loading-bar 3s linear infinite;
+          }
+        `}</style>
       </div>
     );
   }
