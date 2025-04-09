@@ -16,20 +16,20 @@ export default function LandingPage() {
           "https://cr-backend-r0vn.onrender.com/api/session/verify",
           {
             method: "GET",
-            credentials: "include", // Required to send cookies
+            credentials: "include", // ✅ this is essential
           }
         );
 
         if (res.ok) {
           const data = await res.json();
-          console.log("✅ Logged in as:", data.user?.email || "Unknown");
-          router.push("/dashboard"); // Redirect if valid session
+          console.log("Session valid, user:", data.user);
+          router.push("/dashboard");
         } else {
-          console.log("❌ No active session");
-          setCheckingSession(false); // Show landing if not logged in
+          console.log("No valid session");
+          setCheckingSession(false);
         }
       } catch (err) {
-        console.error("Error verifying session:", err);
+        console.error("Error checking session:", err);
         setCheckingSession(false);
       }
     };
@@ -37,17 +37,14 @@ export default function LandingPage() {
     checkSession();
   }, [router]);
 
-  // ⏳ While checking session
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-white bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
-        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-white text-sm">Checking session...</p>
+      <div className="min-h-screen flex items-center justify-center text-white bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
+        <p>Checking your session...</p>
       </div>
     );
   }
 
-  // 🏡 Show landing page
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white font-[Open_Sans] bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600">
       {/* Logo */}
