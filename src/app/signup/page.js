@@ -58,6 +58,7 @@ const SignupForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [accountCreated, setAccountCreated] = useState(false);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -65,13 +66,12 @@ const SignupForm = () => {
 
     setErrors((prevErrors) => {
       let newErrors = { ...prevErrors };
-      delete newErrors[id]; // Clear error when user types
+      delete newErrors[id];
       return newErrors;
     });
   };
 
   const handleSubmit = async (e) => {
-    console.log("Form Submitted", formData);
     e.preventDefault();
     let newErrors = {};
 
@@ -99,17 +99,11 @@ const SignupForm = () => {
     }
 
     setErrors(newErrors);
-    console.log("Validation Errors:", newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      setLoading(true); // ✅ Start loading
+      setLoading(true);
 
       try {
-        console.log(
-          "Sending request to:",
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`
-        );
-
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/signup`,
           {
@@ -120,10 +114,12 @@ const SignupForm = () => {
         );
 
         const data = await response.json();
-        console.log("Signup response data:", data);
 
         if (response.ok) {
-          router.push("/dashboard");
+          setAccountCreated(true);
+          setTimeout(() => {
+            router.push("/login");
+          }, 4000);
         } else {
           alert(data.message || "Signup failed.");
         }
@@ -131,7 +127,7 @@ const SignupForm = () => {
         console.error("Signup Error:", error);
         alert("Something went wrong. Please try again.");
       } finally {
-        setLoading(false); // ✅ Stop loading
+        setLoading(false);
       }
     }
   };
@@ -147,6 +143,20 @@ const SignupForm = () => {
         </div>
         <p className="mt-4 text-green-600 text-sm tracking-wide animate-fade-in-slow">
           Creating your account securely...
+        </p>
+      </div>
+    );
+  }
+
+  if (accountCreated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
+        <div className="w-12 h-12 border-4 border-green-500 rounded-full animate-spin mb-4" />
+        <p className="text-green-600 text-lg font-semibold">
+          Account created successfully!
+        </p>
+        <p className="text-gray-600 text-sm mt-1">
+          Redirecting to login page...
         </p>
       </div>
     );

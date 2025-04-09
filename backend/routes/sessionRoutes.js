@@ -29,6 +29,7 @@ router.get("/verify", async (req, res) => {
 
 // ✅ Logout route
 router.get("/logout", (req, res) => {
+  console.log("🔥 Logout route hit. Clearing cookie...");
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
