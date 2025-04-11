@@ -32,6 +32,17 @@ const Dashboard = () => {
     };
 
     verifySession();
+
+    // 🔁 Listen for logout from other tabs
+    const handleStorageChange = (event) => {
+      if (event.key === "logoutEvent") {
+        console.log("🚪 Logout detected in another tab — reloading...");
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [router]);
 
   const handleLogout = async () => {
@@ -46,6 +57,11 @@ const Dashboard = () => {
 
       if (res.ok) {
         console.log("✅ Logged out successfully");
+
+        // 🚀 Notify other tabs to sync logout
+        localStorage.setItem("session-updated", Date.now());
+        localStorage.setItem("logoutEvent", Date.now());
+
         router.push("/login");
       } else {
         alert("Logout failed. Try again.");

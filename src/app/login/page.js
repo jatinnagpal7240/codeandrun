@@ -33,7 +33,20 @@ export default function LoginPage() {
       }
     };
 
+    // 🔁 Listen for login event from other tabs
+    const onStorageChange = (event) => {
+      if (event.key === "loginEvent") {
+        console.log("🔁 Detected login from another tab — reloading...");
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener("storage", onStorageChange);
     checkSession();
+
+    return () => {
+      window.removeEventListener("storage", onStorageChange);
+    };
   }, [router]);
 
   if (checkingSession) {
@@ -138,6 +151,8 @@ const LoginForm = () => {
         const data = await response.json();
 
         if (response.ok) {
+          localStorage.setItem("session-updated", Date.now()); //Inform other tabs
+          localStorage.setItem("loginEvent", Date.now()); // 🚀 Notify other tabs
           router.push("/dashboard");
         } else {
           alert(data.message || "Login failed.");

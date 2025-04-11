@@ -34,6 +34,17 @@ export default function SignupPage() {
     };
 
     checkSession();
+
+    // 🔄 Listen for session sync across tabs
+    const syncSession = (e) => {
+      if (e.key === "session-updated") {
+        console.log("🔁 Session updated in another tab — rechecking...");
+        checkSession();
+      }
+    };
+
+    window.addEventListener("storage", syncSession);
+    return () => window.removeEventListener("storage", syncSession);
   }, [router]);
 
   if (checkingSession) {

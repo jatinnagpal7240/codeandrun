@@ -22,19 +22,30 @@ export default function LandingPage() {
 
         if (res.ok) {
           const data = await res.json();
-          console.log("Session valid, user:", data.user);
+          console.log("✅ Session valid, user:", data.user);
           router.replace("/dashboard");
         } else {
           console.log("⛔ No valid session — staying on homepage");
           setCheckingSession(false);
         }
       } catch (err) {
-        console.error("Error checking session:", err);
+        console.error("❌ Error checking session on homepage:", err);
         setCheckingSession(false);
       }
     };
 
     checkSession();
+
+    // 🔁 Listen for login/logout changes in other tabs
+    const syncSession = (event) => {
+      if (event.key === "session-updated") {
+        console.log("🔁 Session changed in another tab — rechecking...");
+        checkSession();
+      }
+    };
+
+    window.addEventListener("storage", syncSession);
+    return () => window.removeEventListener("storage", syncSession);
   }, [router]);
 
   if (checkingSession) {
