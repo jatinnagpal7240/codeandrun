@@ -199,22 +199,22 @@ const Dashboard = () => {
 
               {/* <div className="my-4 border-t"></div> */}
 
-              <div className="mt-4">
+              <div className="mt-6">
                 {usernameSuccess ? (
-                  <div className="text-green-600 text-sm mt-1">
+                  <div className="text-green-600 text-sm space-y-1">
                     <p>
                       <strong>{usernameSuccess}</strong>
                     </p>
-                    <p className="text-gray-700 mt-1">
+                    <p className="text-gray-700">
                       You can use it to login next time.
                     </p>
                   </div>
                 ) : !user?.username ? (
-                  <>
-                    <p className="text-sm font-medium text-gray-700 mb-2">
+                  <div className="space-y-4">
+                    <p className="text-sm font-medium text-gray-700">
                       Make your sign in easier
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <input
                         type="text"
                         value={username}
@@ -252,16 +252,16 @@ const Dashboard = () => {
                       </button>
                     </div>
                     {usernameStatus === "available" && (
-                      <p className="text-green-600 text-xs mt-1">
+                      <p className="text-green-600 text-xs">
                         Username available!
                       </p>
                     )}
                     {usernameStatus === "taken" && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-500 text-xs">
                         Username already taken.
                       </p>
                     )}
-                  </>
+                  </div>
                 ) : null}
               </div>
 
