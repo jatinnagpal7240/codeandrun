@@ -10,6 +10,8 @@ const Dashboard = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState(null);
+  const [usernameSuccess, setUsernameSuccess] = useState(null);
+
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const router = useRouter();
@@ -108,7 +110,7 @@ const Dashboard = () => {
         setUser(data.user);
         setUsername("");
         setUsernameStatus(null);
-        alert("✅ Username set successfully!");
+        setUsernameSuccess(`Username Set - ${data.user.username}`);
       } else {
         alert("❌ Could not set username.");
       }
@@ -195,62 +197,75 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="my-4 border-t"></div>
+              {/* <div className="my-4 border-t"></div> */}
 
               <div className="mt-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Make your sign in easier
-                </p>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => {
-                      setUsername(e.target.value);
-                      setUsernameStatus(null);
-                    }}
-                    onBlur={checkUsernameAvailability}
-                    placeholder="Create your username"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <button
-                    onClick={submitUsername}
-                    disabled={!username || usernameStatus !== "available"}
-                    className={`p-2 rounded-lg transition ${
-                      usernameStatus === "available"
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    }`}
-                    title="Submit Username"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
+                {usernameSuccess ? (
+                  <div className="text-green-600 text-sm mt-1">
+                    <p>
+                      <strong>{usernameSuccess}</strong>
+                    </p>
+                    <p className="text-gray-700 mt-1">
+                      You can use it to login next time.
+                    </p>
+                  </div>
+                ) : !user?.username ? (
+                  <>
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Make your sign in easier
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          setUsernameStatus(null);
+                        }}
+                        onBlur={checkUsernameAvailability}
+                        placeholder="Create your username"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       />
-                    </svg>
-                  </button>
-                </div>
-                {usernameStatus === "available" && (
-                  <p className="text-green-600 text-xs mt-1">
-                    Username available!
-                  </p>
-                )}
-                {usernameStatus === "taken" && (
-                  <p className="text-red-500 text-xs mt-1">
-                    Username already taken.
-                  </p>
-                )}
+                      <button
+                        onClick={submitUsername}
+                        disabled={!username || usernameStatus !== "available"}
+                        className={`p-2 rounded-lg transition ${
+                          usernameStatus === "available"
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                        }`}
+                        title="Submit Username"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {usernameStatus === "available" && (
+                      <p className="text-green-600 text-xs mt-1">
+                        Username available!
+                      </p>
+                    )}
+                    {usernameStatus === "taken" && (
+                      <p className="text-red-500 text-xs mt-1">
+                        Username already taken.
+                      </p>
+                    )}
+                  </>
+                ) : null}
               </div>
 
-              <div className="my-5 border-t"></div>
+              {/* <div className="my-5 border-t"></div> */}
 
               <div className="flex gap-4">
                 <button className="flex-1 py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">

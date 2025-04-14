@@ -13,7 +13,7 @@ export default function LandingPage() {
     const checkSession = async () => {
       try {
         const res = await fetch(
-          "https://cr-backend-r0vn.onrender.com/api/session/verify",
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/session/verify`,
           {
             method: "GET",
             credentials: "include",
