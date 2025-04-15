@@ -11,9 +11,14 @@ const Dashboard = () => {
   const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState(null);
   const [usernameSuccess, setUsernameSuccess] = useState(null);
+  const usernameRegex = /^[a-zA-Z0-9_]{10,}$/;
+  const [showTooltip, setShowTooltip] = useState(false);
 
+  const tooltipIconRef = useRef(null);
+  const tooltipBoxRef = useRef(null);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -43,23 +48,31 @@ const Dashboard = () => {
     };
     window.addEventListener("storage", handleStorageChange);
 
+    // ✅ Scoped click handler (fresh refs + state)
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
-      ) {
+      const isInDropdown =
+        dropdownRef.current?.contains(event.target) ||
+        buttonRef.current?.contains(event.target);
+      const isInTooltip =
+        tooltipIconRef.current?.contains(event.target) ||
+        tooltipBoxRef.current?.contains(event.target);
+
+      if (!isInDropdown && dropdownOpen) {
         setDropdownOpen(false);
       }
+
+      if (!isInTooltip && showTooltip) {
+        setShowTooltip(false);
+      }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [router]);
+  }, [dropdownOpen, showTooltip, router]);
 
   const handleLogout = async () => {
     try {
@@ -81,10 +94,17 @@ const Dashboard = () => {
   };
 
   const checkUsernameAvailability = async () => {
-    if (!username.trim()) return;
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
+    if (!usernameRegex.test(trimmed)) {
+      setUsernameStatus("invalid");
+      return;
+    }
+
     try {
       const res = await fetch(
-        `https://cr-backend-r0vn.onrender.com/api/username/check?username=${username.trim()}`
+        `https://cr-backend-r0vn.onrender.com/api/username/check?username=${trimmed}`
       );
       setUsernameStatus(res.status === 200 ? "available" : "taken");
     } catch (err) {
@@ -94,7 +114,14 @@ const Dashboard = () => {
   };
 
   const submitUsername = async () => {
-    if (!username.trim() || usernameStatus !== "available") return;
+    const trimmed = username.trim();
+    if (!trimmed) return;
+
+    if (!usernameRegex.test(trimmed)) {
+      setShowTooltip(true);
+      return;
+    }
+
     try {
       const res = await fetch(
         "https://cr-backend-r0vn.onrender.com/api/username/set",
@@ -102,7 +129,7 @@ const Dashboard = () => {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: username.trim() }),
+          body: JSON.stringify({ username: trimmed }),
         }
       );
       if (res.ok) {
@@ -111,6 +138,7 @@ const Dashboard = () => {
         setUsername("");
         setUsernameStatus(null);
         setUsernameSuccess(`Username Set - ${data.user.username}`);
+        setShowTooltip(false);
       } else {
         alert("❌ Could not set username.");
       }
@@ -165,7 +193,6 @@ const Dashboard = () => {
             className="h-18 w-auto object-contain"
           />
         </div>
-
         <div className="relative mr-4">
           <button
             ref={buttonRef}
@@ -186,7 +213,6 @@ const Dashboard = () => {
               >
                 &times;
               </button>
-
               <div className="flex items-center gap-4">
                 {renderAvatar()}
                 <div>
@@ -196,8 +222,6 @@ const Dashboard = () => {
                   <p className="text-gray-500 text-sm">{user?.email}</p>
                 </div>
               </div>
-
-              {/* <div className="my-4 border-t"></div> */}
 
               <div className="mt-6">
                 {usernameSuccess ? (
@@ -210,10 +234,38 @@ const Dashboard = () => {
                     </p>
                   </div>
                 ) : !user?.username ? (
-                  <div className="space-y-4">
-                    <p className="text-sm font-medium text-gray-700">
-                      Make your sign in easier
-                    </p>
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                      Choose a unique username
+                      <span className="relative">
+                        <svg
+                          ref={tooltipIconRef}
+                          onClick={() => setShowTooltip(!showTooltip)}
+                          className="w-4 h-4 text-gray-500 cursor-pointer"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M13 16h-1v-4h-1m1-4h.01M12 19a7 7 0 100-14 7 7 0 000 14z"
+                          />
+                        </svg>
+                        {showTooltip && (
+                          <div
+                            ref={tooltipBoxRef}
+                            className="absolute z-50 top-6 left-1/2 transform -translate-x-1/2 bg-white text-gray-700 border rounded-lg p-2 shadow-lg text-xs w-64"
+                          >
+                            ✅ Username must be at least{" "}
+                            <strong>10 characters</strong> long, and can only
+                            contain letters, numbers, and underscores.
+                          </div>
+                        )}
+                      </span>
+                    </div>
+
                     <div className="flex items-center gap-3">
                       <input
                         type="text"
@@ -228,9 +280,9 @@ const Dashboard = () => {
                       />
                       <button
                         onClick={submitUsername}
-                        disabled={!username || usernameStatus !== "available"}
+                        disabled={!username}
                         className={`p-2 rounded-lg transition ${
-                          usernameStatus === "available"
+                          username
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "bg-gray-300 text-gray-600 cursor-not-allowed"
                         }`}
@@ -265,9 +317,7 @@ const Dashboard = () => {
                 ) : null}
               </div>
 
-              {/* <div className="my-5 border-t"></div> */}
-
-              <div className="flex gap-4">
+              <div className="mt-6 flex gap-4">
                 <button className="flex-1 py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                   Manage your CR Account
                 </button>
