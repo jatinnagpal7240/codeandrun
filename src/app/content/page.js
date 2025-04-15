@@ -98,6 +98,8 @@ export default function Home() {
                   src="/images-removebg-preview (1).png"
                   alt="Python@100"
                   className="w-20 h-20 object-contain"
+                  width="200"
+                  height="200"
                 />
                 <h3 className="text-lg font-semibold text-gray-900 mt-4">
                   Code & Run Python@100

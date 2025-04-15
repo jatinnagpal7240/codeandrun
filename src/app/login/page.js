@@ -186,7 +186,7 @@ const LoginForm = () => {
     <form className="space-y-6" onSubmit={handleSubmit}>
       <InputField
         id="identifier"
-        label="Email or Phone"
+        label="Username, Email or Phone"
         value={formData.identifier}
         onChange={handleChange}
         error={errors.identifier}
