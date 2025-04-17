@@ -52,14 +52,18 @@ router.post("/login", async (req, res) => {
   const { identifier, password } = req.body;
 
   if (!identifier || !password) {
-    return res
-      .status(400)
-      .json({ message: "Email or phone and password are required." });
+    return res.status(400).json({
+      message: "Email, phone, or username and password are required.",
+    });
   }
 
   try {
     const user = await User.findOne({
-      $or: [{ email: identifier }, { phone: identifier }],
+      $or: [
+        { email: identifier },
+        { phone: identifier },
+        { username: identifier }, // ✅ Added username check here
+      ],
     });
 
     if (!user) {
@@ -78,16 +82,16 @@ router.post("/login", async (req, res) => {
     // ✅ Generate JWT Token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || "supersecret", // Replace in production
+      process.env.JWT_SECRET || "supersecret",
       { expiresIn: "7d" }
     );
 
-    // ✅ Set token cookie with correct flags
+    // ✅ Set token cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true, // Required for cross-site HTTPS
-      sameSite: "None", // Required for cross-origin
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({ message: "Login successful" });

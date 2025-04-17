@@ -115,7 +115,7 @@ const LoginForm = () => {
 
     // Validation
     if (!formData.identifier.trim()) {
-      newErrors.identifier = "Enter an email or phone number.";
+      newErrors.identifier = "Enter a username, email or phone number.";
     }
 
     if (!formData.password.trim()) {
